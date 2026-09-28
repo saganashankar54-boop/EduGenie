@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EduGenie - AI Learning Assistant</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Top Logos -->
+    <header class="top-header">
+
+        <div class="brand-logo smartbridge">
+            <div class="bridge-symbol">
+                ◇
+            </div>
+
+            <div>
+                <div class="brand-name">SMARTBRIDGE</div>
+                <div class="brand-tagline">Let's Bridge the Gap</div>
+            </div>
+        </div>
+
+
+        <div class="brand-logo smartinternz">
+
+            <div class="internz-symbol">
+                ◫
+            </div>
+
+            <div class="internz-name">
+                Smart<br>
+                <strong>Internz</strong>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- Main EduGenie Application -->
+    <main class="app-container">
+
+        <!-- Welcome -->
+        <section class="welcome-section">
+
+            <h1>
+                Welcome to EduGenie 🧠✨
+            </h1>
+
+            <p>
+                Your personal AI tutor for learning support!
+            </p>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- ASK QUESTION -->
+        <!-- ============================= -->
+
+        <section class="module">
+
+            <label class="module-title">
+                Ask EduGenie a Question:
+            </label>
+
+            <div class="input-row">
+
+                <input
+                    type="text"
+                    id="question"
+                    placeholder="Why is the sky blue?"
+                >
+
+                <button
+                    id="qaBtn"
+                    onclick="askQuestion()"
+                >
+                    Get Answer
+                </button>
+
+            </div>
+
+            <div
+                id="qaResult"
+                class="result-box"
+            >
+                <div id="qaBody"></div>
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- EXPLANATION -->
+        <!-- ============================= -->
+
+        <section class="module">
+
+            <label class="module-title">
+                Need an Explanation?
+            </label>
+
+            <div class="input-row">
+
+                <input
+                    type="text"
+                    id="topic"
+                    placeholder="Photosynthesis"
+                >
+
+                <button
+                    id="explainBtn"
+                    onclick="explainTopic()"
+                >
+                    Explain
+                </button>
+
+            </div>
+
+            <div
+                id="explanationResult"
+                class="result-box"
+            >
+                <div id="explainBody"></div>
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- SUMMARY -->
+        <!-- ============================= -->
+
+        <section class="module">
+
+            <label class="module-title">
+                Summarize a Paragraph:
+            </label>
+
+            <div class="input-row">
+
+                <input
+                    type="text"
+                    id="summaryText"
+                    placeholder="Paste long content to summarize"
+                >
+
+                <button
+                    id="summaryBtn"
+                    onclick="summarizeText()"
+                >
+                    Summarize
+                </button>
+
+            </div>
+
+            <div
+                id="summaryResult"
+                class="result-box"
+            >
+                <div id="summaryBody"></div>
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- QUIZ -->
+        <!-- ============================= -->
+
+        <section class="module">
+
+            <label class="module-title">
+                Generate a Quiz:
+            </label>
+
+            <div class="input-row">
+
+                <input
+                    type="text"
+                    id="quizText"
+                    placeholder="Solar System"
+                >
+
+                <button
+                    id="quizBtn"
+                    onclick="generateQuiz()"
+                >
+                    Generate Quiz
+                </button>
+
+            </div>
+
+            <div
+                id="quizResult"
+                class="result-box quiz-result"
+            >
+                <div id="quizBody"></div>
+            </div>
+
+        </section>
+
+
+        <!-- ============================= -->
+        <!-- LEARNING RECOMMENDATIONS -->
+        <!-- ============================= -->
+
+        <section class="module">
+
+            <label class="module-title">
+                Get Learning Recommendations:
+            </label>
+
+            <div class="recommend-input">
+
+                <input
+                    type="text"
+                    id="recommendTopic"
+                    placeholder="e.g. Linear Regression"
+                >
+
+            </div>
+
+            <button
+                id="recommendBtn"
+                class="recommend-button"
+                onclick="getRecommendations()"
+            >
+                Get Recommendations
+            </button>
+
+            <div
+                id="recommendResult"
+                class="result-box"
+            >
+                <div id="recommendBody"></div>
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            EduGenie • AI Powered Learning Assistant
+        </p>
+    </footer>
+
+
+<script>
+
+/* =========================================
+   COMMON HELPERS
+========================================= */
+
+function setLoading(button, text) {
+
+    button.disabled = true;
+    button.dataset.originalText = button.innerText;
+    button.innerText = text;
+
+}
+
+
+function resetButton(button) {
+
+    button.disabled = false;
+
+    if (button.dataset.originalText) {
+        button.innerText = button.dataset.originalText;
+    }
+
+}
+
+
+function showResult(element, content) {
+
+    element.innerHTML = content;
+    element.classList.add("show");
+
+}
+
+
+function escapeHtml(text) {
+
+    if (!text) return "";
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function formatText(text) {
+
+    return escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n/g, "<br>");
+}
+
+
+/* =========================================
+   ASK QUESTION
+========================================= */
+
+async function askQuestion() {
+
+    const input = document.getElementById("question");
+    const button = document.getElementById("qaBtn");
+    const result = document.getElementById("qaResult");
+    const body = document.getElementById("qaBody");
+
+    const question = input.value.trim();
+
+    if (!question) {
+
+        showResult(
+            result,
+            "Please enter a question."
+        );
+
+        return;
+    }
+
+    setLoading(button, "Thinking...");
+
+    body.innerHTML = "Generating answer...";
+
+    result.classList.add("show");
+
+    try {
+
+        const response = await fetch(
+            `/qa?question=${encodeURIComponent(question)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Unable to get answer."
+            );
+
+        }
+
+        const answer =
+            data.answer ||
+            data.response ||
+            data.result ||
+            data;
+
+        body.innerHTML = formatText(
+            typeof answer === "string"
+                ? answer
+                : JSON.stringify(answer, null, 2)
+        );
+
+    }
+    catch (error) {
+
+        body.innerHTML =
+            "⚠️ " + escapeHtml(error.message);
+
+    }
+    finally {
+
+        resetButton(button);
+
+    }
+}
+
+
+/* =========================================
+   EXPLANATION
+========================================= */
+
+async function explainTopic() {
+
+    const input = document.getElementById("topic");
+    const button = document.getElementById("explainBtn");
+    const result = document.getElementById("explanationResult");
+    const body = document.getElementById("explainBody");
+
+    const topic = input.value.trim();
+
+    if (!topic) {
+
+        showResult(
+            result,
+            "Please enter a topic."
+        );
+
+        return;
+    }
+
+    setLoading(button, "Explaining...");
+
+    body.innerHTML = "Creating a simple explanation...";
+
+    result.classList.add("show");
+
+    try {
+
+        const response = await fetch(
+            "/explain/",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    topic: topic
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Unable to explain topic."
+            );
+
+        }
+
+        const answer =
+            data.explanation ||
+            data.answer ||
+            data.response ||
+            data.result ||
+            data;
+
+        body.innerHTML = formatText(
+            typeof answer === "string"
+                ? answer
+                : JSON.stringify(answer, null, 2)
+        );
+
+    }
+    catch (error) {
+
+        body.innerHTML =
+            "⚠️ " + escapeHtml(error.message);
+
+    }
+    finally {
+
+        resetButton(button);
+
+    }
+}
+
+
+/* =========================================
+   SUMMARY
+========================================= */
+
+async function summarizeText() {
+
+    const input = document.getElementById("summaryText");
+    const button = document.getElementById("summaryBtn");
+    const result = document.getElementById("summaryResult");
+    const body = document.getElementById("summaryBody");
+
+    const text = input.value.trim();
+
+    if (!text) {
+
+        showResult(
+            result,
+            "Please enter some text to summarize."
+        );
+
+        return;
+    }
+
+    setLoading(button, "Summarizing...");
+
+    body.innerHTML = "Creating summary...";
+
+    result.classList.add("show");
+
+    try {
+
+        const response = await fetch(
+            "/summarize/",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Unable to summarize."
+            );
+
+        }
+
+        const answer =
+            data.summary ||
+            data.answer ||
+            data.response ||
+            data.result ||
+            data;
+
+        body.innerHTML = formatText(
+            typeof answer === "string"
+                ? answer
+                : JSON.stringify(answer, null, 2)
+        );
+
+    }
+    catch (error) {
+
+        body.innerHTML =
+            "⚠️ " + escapeHtml(error.message);
+
+    }
+    finally {
+
+        resetButton(button);
+
+    }
+}
+
+
+/* =========================================
+   QUIZ
+========================================= */
+
+async function generateQuiz() {
+
+    const input = document.getElementById("quizText");
+    const button = document.getElementById("quizBtn");
+    const result = document.getElementById("quizResult");
+    const body = document.getElementById("quizBody");
+
+    const text = input.value.trim();
+
+    if (!text) {
+
+        showResult(
+            result,
+            "Please enter a topic or passage."
+        );
+
+        return;
+    }
+
+    setLoading(button, "Generating...");
+
+    body.innerHTML = "Creating your quiz...";
+
+    result.classList.add("show");
+
+    try {
+
+        const response = await fetch(
+            "/quiz",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Unable to generate quiz."
+            );
+
+        }
+
+        const quiz =
+            Array.isArray(data)
+                ? data
+                : data.quiz || data.questions || [];
+
+        if (!quiz.length) {
+
+            body.innerHTML =
+                "No quiz questions were generated.";
+
+            return;
+        }
+
+        body.innerHTML = quiz.map(
+            (item, index) => {
+
+                const options =
+                    item.options || [];
+
+                return `
+
+                    <div class="quiz-question">
+
+                        <div class="question-text">
+                            ${index + 1}. ${escapeHtml(
+                                item.question || ""
+                            )}
+                        </div>
+
+                        <div class="quiz-options">
+
+                            ${options.map(
+                                (option, optionIndex) => `
+
+                                    <label class="quiz-option">
+
+                                        <input
+                                            type="radio"
+                                            name="question-${index}"
+                                            value="${escapeHtml(option)}"
+                                        >
+
+                                        <span>
+                                            ${escapeHtml(option)}
+                                        </span>
+
+                                    </label>
+
+                                `
+                            ).join("")}
+
+                        </div>
+
+                        <button
+                            class="check-answer"
+                            onclick='checkQuizAnswer(
+                                ${index},
+                                ${JSON.stringify(item.answer || "")}
+                            )'
+                        >
+                            Check Answer
+                        </button>
+
+                        <div
+                            id="feedback-${index}"
+                            class="quiz-feedback"
+                        ></div>
+
+                    </div>
+
+                `;
+            }
+        ).join("");
+
+    }
+    catch (error) {
+
+        body.innerHTML =
+            "⚠️ " + escapeHtml(error.message);
+
+    }
+    finally {
+
+        resetButton(button);
+
+    }
+}
+
+
+/* =========================================
+   CHECK QUIZ ANSWER
+========================================= */
+
+function checkQuizAnswer(index, correctAnswer) {
+
+    const selected =
+        document.querySelector(
+            `input[name="question-${index}"]:checked`
+        );
+
+    const feedback =
+        document.getElementById(
+            `feedback-${index}`
+        );
+
+    if (!selected) {
+
+        feedback.innerHTML =
+            "Please select an answer.";
+
+        feedback.className =
+            "quiz-feedback warning";
+
+        return;
+    }
+
+    if (selected.value === correctAnswer) {
+
+        feedback.innerHTML =
+            "✓ Correct answer!";
+
+        feedback.className =
+            "quiz-feedback correct";
+
+    }
+    else {
+
+        feedback.innerHTML =
+            `✗ Incorrect. Correct answer: ${escapeHtml(correctAnswer)}`;
+
+        feedback.className =
+            "quiz-feedback incorrect";
+
+    }
+}
+
+
+/* =========================================
+   LEARNING RECOMMENDATIONS
+========================================= */
+
+async function getRecommendations() {
+
+    const input =
+        document.getElementById("recommendTopic");
+
+    const button =
+        document.getElementById("recommendBtn");
+
+    const result =
+        document.getElementById("recommendResult");
+
+    const body =
+        document.getElementById("recommendBody");
+
+    const topic =
+        input.value.trim();
+
+    if (!topic) {
+
+        showResult(
+            result,
+            "Please enter a topic."
+        );
+
+        return;
+    }
+
+    setLoading(
+        button,
+        "Loading..."
+    );
+
+    body.innerHTML =
+        "Creating your learning path...";
+
+    result.classList.add("show");
+
+    try {
+
+        const response = await fetch(
+            `/learn/recommendations?topic=${encodeURIComponent(topic)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Unable to generate recommendations."
+            );
+
+        }
+
+        const answer =
+            data.recommendations ||
+            data.answer ||
+            data.response ||
+            data.result ||
+            data;
+
+        body.innerHTML = formatText(
+            typeof answer === "string"
+                ? answer
+                : JSON.stringify(answer, null, 2)
+        );
+
+    }
+    catch (error) {
+
+        body.innerHTML =
+            "⚠️ " + escapeHtml(error.message);
+
+    }
+    finally {
+
+        resetButton(button);
+
+    }
+}
+
+
+/* =========================================
+   ENTER KEY SUPPORT
+========================================= */
+
+document.getElementById("question")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            askQuestion();
+        }
+
+    });
+
+
+document.getElementById("topic")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            explainTopic();
+        }
+
+    });
+
+
+document.getElementById("quizText")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            generateQuiz();
+        }
+
+    });
+
+
+document.getElementById("recommendTopic")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            getRecommendations();
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
